@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stuut · Control Center · Autonomy</title>
+  <meta name="description" content="Earned Autonomy: certified hands-free thresholds for Stuut Agent jobs, with an anytime-valid monitor that reverts to review on drift. Unofficial concept demo." />
+  <link rel="icon" type="image/svg+xml" href="assets/stuuty.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script>window.__errs=[];addEventListener("error",function(e){__errs.push(String(e.message))});addEventListener("unhandledrejection",function(e){__errs.push(String(e.reason))});</script>
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar panel" aria-label="Primary">
+      <div class="org" role="button" tabindex="0" aria-label="Switch organization"><span class="logo">ACME</span><span>Acme Inc</span></div>
+      <div class="agent-row"><img src="assets/stuuty.svg" alt="" /><span>Stuut AI</span></div>
+      <nav class="nav" aria-label="Main">
+        <a href="#/home"><i data-lucide="house"></i>Home</a>
+        <a href="#/tasks"><i data-lucide="list-checks"></i>Tasks<span class="count num" id="taskCount"></span></a>
+        <a href="#/analytics"><i data-lucide="chart-pie"></i>Analytics</a>
+      </nav>
+      <div class="nav-label">Workspace</div>
+      <nav class="nav" aria-label="Workspace">
+        <a href="#/collections"><i data-lucide="send"></i>Collections</a>
+        <a href="#/cash-app"><i data-lucide="dollar-sign"></i>Cash App</a>
+        <a href="#/deductions"><i data-lucide="divide"></i>Deductions</a>
+        <a href="#/disputes"><i data-lucide="scale"></i>Disputes</a>
+        <a href="#/control-center/autonomy" class="active" aria-current="page"><i data-lucide="zap"></i>Control Center</a>
+      </nav>
+      <div class="user"><div class="avatar">TP</div><div class="who"><b>Theresa Peterson</b><span>theresa.peterson@acme.com</span></div><i data-lucide="chevron-down" class="chev"></i></div>
+    </aside>
+
+    <section class="cc panel" aria-label="Control Center">
+      <h1>Control Center</h1>
+      <p class="sub">Manage agent rules and triggers</p>
+      <a class="cc-item" href="#/control-center/collections"><i data-lucide="send"></i><div><b>Collections</b><p>Define how your agent monitors and follows up on open invoices.</p></div></a>
+      <a class="cc-item" href="#/control-center/cash-app"><i data-lucide="circle-alert"></i><div><b>Cash App</b><p>Configure how your agent applies and reconciles payments.</p></div></a>
+      <a class="cc-item" href="#/control-center/payments"><i data-lucide="hand-coins"></i><div><b>Payments</b><p>Enable and customize your Stuut-powered payment experience.</p></div></a>
+      <a class="cc-item" href="#/control-center/disputes"><i data-lucide="circle-alert" class="blue"></i><div><b>Disputes</b><p>Configure dispute reason codes for your workflow.</p></div></a>
+      <a class="cc-item active" href="#/control-center/autonomy" aria-current="true"><i data-lucide="shield-check"></i><div><b>Autonomy <span class="badge-new">NEW</span></b><p>Decide what Stuut does without review, backed by its review record.</p></div></a>
+    </section>
+
+    <main class="main panel" id="main" aria-live="polite">
+      <div class="tabs" role="tablist" aria-label="Autonomy views">
+        <button role="tab" data-tab="certificate">Certificate</button>
+        <button role="tab" data-tab="patterns">Patterns</button>
+        <button role="tab" data-tab="monitor">Shadow run &amp; monitor</button>
+        <button role="tab" data-tab="history">History</button>
+        <span class="kbd-hint">Shortcuts <kbd>?</kbd></span>
+      </div>
+      <div class="scroll" id="view">
+        <div class="skel" style="height:28px;width:260px;margin-bottom:10px"></div>
+        <div class="skel" style="height:16px;width:420px;margin-bottom:22px"></div>
+        <div class="skel" style="height:54px;margin-bottom:16px"></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px"><div class="skel" style="height:98px"></div><div class="skel" style="height:98px"></div><div class="skel" style="height:98px"></div><div class="skel" style="height:98px"></div></div>
+        <div class="skel" style="height:320px"></div>
+      </div>
+      <div class="foot-note">Unofficial concept demo by Mohith Gajjela. Not affiliated with Stuut. Synthetic data. <a href="https://github.com/Mohith26/stuut-earned-autonomy" target="_blank" rel="noopener">Source and method</a></div>
+    </main>
+  </div>
+  <div id="overlay"></div>
+</body>
+</html>

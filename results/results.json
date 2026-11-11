@@ -1,0 +1,255 @@
+{
+  "generated": "1970-01-01T00:00:00.000Z",
+  "seed": 20261111,
+  "defaults": {
+    "eps": 0.02,
+    "delta": 0.05,
+    "rule": "material"
+  },
+  "jobs": {
+    "email": {
+      "label": "Replying to emails",
+      "calibrationReviews": 3448,
+      "threshold": 0.955,
+      "handsFreePct": 46.61,
+      "observedRiskPct": 1.12,
+      "certifiedBoundPct": 1.66,
+      "k": 18,
+      "n": 1607,
+      "rawCutoff90": {
+        "handsFreePct": 68.39,
+        "riskPct": 2.76
+      },
+      "shadow": {
+        "tasks": 1529,
+        "handsFreePct": 46.76,
+        "preDrift": {
+          "n": 361,
+          "k": 5,
+          "riskPct": 1.39
+        },
+        "postDrift": {
+          "n": 354,
+          "k": 23,
+          "riskPct": 6.5
+        },
+        "rawCutoff90PreDrift": {
+          "handsFreePct": 66.41,
+          "riskPct": 2.48
+        }
+      },
+      "monitor": {
+        "audit100": {
+          "alarm": "2026-10-28 17:40",
+          "daysAfterDrift": 2.7,
+          "weeklyCheckAlarm": "2026-11-02 00:00",
+          "badBeforeAlarm": 7,
+          "badBeforeWeekly": 15
+        },
+        "audit10": {
+          "audited": 67,
+          "alarm": null,
+          "daysAfterDrift": null,
+          "weeklyCheckAlarm": "2026-11-02 00:00"
+        }
+      },
+      "unlocks": [
+        {
+          "handsFreePct": 51.83,
+          "riskPct": 1.62,
+          "extraReviews": 4460,
+          "weeks": 11.6
+        },
+        {
+          "handsFreePct": 56.82,
+          "riskPct": 1.79,
+          "extraReviews": 17716,
+          "weeks": 46.2
+        },
+        {
+          "handsFreePct": 61.83,
+          "riskPct": 2.02,
+          "extraReviews": null,
+          "weeks": null
+        }
+      ],
+      "reviewsSavedPerWeek": 179,
+      "simulationTruthPct": 1.89,
+      "monitorTable": [
+        {
+          "rate": 1,
+          "perDay": 25.5,
+          "medianDaysE": 4.9,
+          "medianDaysW": 7,
+          "falseAlarmE": 0.33,
+          "falseAlarmW": 7.67
+        },
+        {
+          "rate": 0.5,
+          "perDay": 12.8,
+          "medianDaysE": 10.6,
+          "medianDaysW": 7,
+          "falseAlarmE": 0,
+          "falseAlarmW": 20.67
+        },
+        {
+          "rate": 0.25,
+          "perDay": 6.4,
+          "medianDaysE": 18.8,
+          "medianDaysW": 14,
+          "falseAlarmE": 0,
+          "falseAlarmW": 9.67
+        },
+        {
+          "rate": 0.1,
+          "perDay": 2.6,
+          "medianDaysE": 47.2,
+          "medianDaysW": 21,
+          "falseAlarmE": 0,
+          "falseAlarmW": 47.67
+        }
+      ],
+      "recertifyLatest": {
+        "threshold": null,
+        "handsFreePct": 0,
+        "certifiedBoundPct": null
+      },
+      "recertifyLatestExcludingDriftPattern": {
+        "pattern": "Payment reported after the agent ran",
+        "threshold": 0.932,
+        "handsFreePctOfAll": 56.37,
+        "certifiedBoundPct": 1.76
+      }
+    },
+    "promise": {
+      "label": "Capturing payment promises",
+      "calibrationReviews": 2646,
+      "threshold": null,
+      "handsFreePct": 0,
+      "observedRiskPct": 0,
+      "certifiedBoundPct": null,
+      "k": 0,
+      "n": 0,
+      "rawCutoff90": {
+        "handsFreePct": 57.11,
+        "riskPct": 4.04
+      },
+      "shadow": {
+        "tasks": 1170,
+        "handsFreePct": 0,
+        "preDrift": {
+          "n": 0,
+          "k": 0,
+          "riskPct": 0
+        },
+        "postDrift": null,
+        "rawCutoff90PreDrift": {
+          "handsFreePct": 58.12,
+          "riskPct": 3.24
+        }
+      },
+      "monitor": {
+        "audit100": {
+          "alarm": null,
+          "daysAfterDrift": null,
+          "weeklyCheckAlarm": null,
+          "badBeforeAlarm": null,
+          "badBeforeWeekly": null
+        },
+        "audit10": {
+          "audited": 0,
+          "alarm": null,
+          "daysAfterDrift": null,
+          "weeklyCheckAlarm": null
+        }
+      },
+      "unlocks": [
+        {
+          "handsFreePct": 20.07,
+          "riskPct": 1.51,
+          "extraReviews": 9453,
+          "weeks": 32.2
+        },
+        {
+          "handsFreePct": 23.2,
+          "riskPct": 1.95,
+          "extraReviews": 1112721,
+          "weeks": 3784.8
+        },
+        {
+          "handsFreePct": 27.36,
+          "riskPct": 1.8,
+          "extraReviews": 46499,
+          "weeks": 158.2
+        }
+      ],
+      "reviewsSavedPerWeek": 0,
+      "simulationTruthPct": null
+    },
+    "cashapp": {
+      "label": "Applying payments",
+      "calibrationReviews": 7525,
+      "threshold": 0.929,
+      "handsFreePct": 69.17,
+      "observedRiskPct": 1.34,
+      "certifiedBoundPct": 1.64,
+      "k": 70,
+      "n": 5205,
+      "rawCutoff90": {
+        "handsFreePct": 76.19,
+        "riskPct": 1.83
+      },
+      "shadow": {
+        "tasks": 3304,
+        "handsFreePct": 70.22,
+        "preDrift": {
+          "n": 2320,
+          "k": 24,
+          "riskPct": 1.03
+        },
+        "postDrift": null,
+        "rawCutoff90PreDrift": {
+          "handsFreePct": 77.3,
+          "riskPct": 1.41
+        }
+      },
+      "monitor": {
+        "audit100": {
+          "alarm": null,
+          "daysAfterDrift": null,
+          "weeklyCheckAlarm": null,
+          "badBeforeAlarm": null,
+          "badBeforeWeekly": null
+        },
+        "audit10": {
+          "audited": 218,
+          "alarm": null,
+          "daysAfterDrift": null,
+          "weeklyCheckAlarm": null
+        }
+      },
+      "unlocks": [
+        {
+          "handsFreePct": 74.47,
+          "riskPct": 1.7,
+          "extraReviews": 899,
+          "weeks": 1.1
+        },
+        {
+          "handsFreePct": 80.04,
+          "riskPct": 2.06,
+          "extraReviews": null,
+          "weeks": null
+        },
+        {
+          "handsFreePct": 84.33,
+          "riskPct": 2.51,
+          "extraReviews": null,
+          "weeks": null
+        }
+      ],
+      "reviewsSavedPerWeek": 578,
+      "simulationTruthPct": 1.3
+    }
+  }
+}
