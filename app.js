@@ -12,7 +12,7 @@ const TABS = ['certificate', 'patterns', 'monitor', 'history'];
 const S = {
   data: null, tab: 'certificate', job: 'email', eps: 0.02, conf: 0.95, rule: 'material', audit: 1,
   window: 'issued', pattern: null, drawerFilter: 'all', drawerPage: 0, search: '', sort: { key: 'n', dir: -1 },
-  menu: false, dialog: null,
+  menu: false, dialog: null, histFilter: 'All',
   saved: { enabled: {}, excluded: {}, events: [] },
 };
 try { const s = JSON.parse(localStorage.getItem(STORE) || 'null'); if (s) S.saved = { enabled: {}, excluded: {}, events: [], ...s }; } catch { /* ignore */ }
@@ -333,11 +333,14 @@ function attributionCard(at, job) {
 // ---------- history tab ----------
 function viewHistory() {
   const seeded = seededEvents().map(e => ({ ts: fmtDT(e.t) + ':00', ...e }));
-  const all = [...S.saved.events.map(e => ({ ...e, ts: e.ts + ':00' })), ...seeded];
+  const kindOf = e => (e.kind === 'person' ? 'Person' : e.kind === 'agent' ? 'Agent' : 'System');
+  const all = [...S.saved.events.map(e => ({ ...e, ts: e.ts + ':00' })), ...seeded].filter(e => S.histFilter === 'All' || kindOf(e) === S.histFilter);
   const ico = e => e.kind === 'person' ? `<div class="ico person">${esc(e.actor.split(' ').map(s => s[0]).join(''))}</div>` : e.kind === 'agent' ? '<div class="ico"><i data-lucide="bot"></i></div>' : '<div class="ico"><i data-lucide="settings"></i></div>';
   return `${head('History', 'Every certificate, change and revert, recorded like the Audit Log')}
     <div class="banner"><i data-lucide="info"></i><div class="grow">History covers Autonomy events for all jobs. Actions you take here are saved in this browser.</div>${S.saved.events.length ? '<button class="btn" data-act="reset">Reset demo</button>' : ''}</div>
+    <div class="toolbar"><span class="chip" style="cursor:default"><i data-lucide="calendar"></i><span style="color:var(--muted-foreground)">Date:</span> All Time</span><div class="seg" role="group" aria-label="Actor">${['All', 'Person', 'Agent', 'System'].map(k => `<button class="${S.histFilter === k ? 'on' : ''}" data-hist="${k}">${k}</button>`).join('')}</div><span class="spacer"></span><button class="btn" data-export="history"><i data-lucide="download"></i>Export</button></div>
     <div class="tbl-wrap log"><div class="row" style="font-size:13.5px;color:var(--neutral-600);padding:11px 14px"><span class="date">Date</span><span>Description</span></div>
+    ${all.length ? '' : '<div class="empty"><b>No events for this filter</b>Try All.</div>'}
     ${all.map(e => `<div class="row"><span class="date">${esc(e.ts)}</span>${ico(e)}<span class="desc">${e.html}</span>${e.more ? `<span class="more">${e.more}</span>` : ''}</div>`).join('')}</div>
     <div class="pager"><span class="num">1 - ${all.length} of ${all.length}</span></div>`;
 }
@@ -406,6 +409,9 @@ function doExport(kind) {
       { label: 'Date', get: i => fmtDT(job.cols.t[i]) }, { label: 'Customer', get: i => S.data.customers[job.cols.cu[i]] }, { label: 'Invoice', get: i => job.cols.inv[i] },
       { label: 'Amount', get: i => (job.cols.amt[i] / 100).toFixed(2) }, { label: 'Pattern', get: i => job.patterns[job.cols.g[i]] }, { label: 'Confidence', get: i => (job.cols.c[i] / 1000).toFixed(3) },
       { label: 'Hands-free', get: i => (job.cols.c[i] / 1000 >= a.cert.threshold ? 'yes' : 'no') }, { label: 'Reviewer action', get: i => job.actions[job.cols.y[i]] }, { label: 'Reviewer', get: i => S.data.reviewers[job.cols.rv[i]] }]), 'text/csv');
+  } else if (kind === 'history') {
+    const rows = [...S.saved.events, ...seededEvents().map(e => ({ ...e, ts: fmtDT(e.t) }))];
+    download('stuut-autonomy-history.csv', toCSV(rows, [{ key: 'ts', label: 'Date' }, { key: 'actor', label: 'Actor' }, { label: 'Description', get: r => r.html.replace(/<[^>]+>/g, '') }]), 'text/csv');
   } else if (kind === 'monitor') {
     const m = Aissued().shadow && Aissued().shadow.monitor;
     if (!m) return toast('Nothing to export: no certified threshold for this job');
@@ -427,7 +433,7 @@ function toggleExclude(g) {
   S.saved.excluded[S.job] = [...cur]; persist(); render();
 }
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-tab],[data-job],[data-act],[data-export],[data-sort],[data-pattern],[data-df],[data-page],[data-audit],[data-daudit],[data-exclude],[data-exclude-recert],[data-pt],[data-raw]');
+  const t = e.target.closest('[data-tab],[data-job],[data-act],[data-export],[data-sort],[data-pattern],[data-df],[data-page],[data-audit],[data-daudit],[data-exclude],[data-exclude-recert],[data-hist],[data-pt],[data-raw]');
   if (S.menu && !(t && (t.dataset.act === 'menu' || t.dataset.export))) { S.menu = false; render(); }
   if (!t) return;
   if (t.closest('[data-exclude-toggle]')) return;
@@ -440,6 +446,7 @@ document.addEventListener('click', e => {
   else if (d.df) { S.drawerFilter = d.df; S.drawerPage = 0; render(); }
   else if (d.page) { S.drawerPage = Math.max(0, +d.page); render(); }
   else if (d.audit) { S.audit = +d.audit; render(); }
+  else if (d.hist) { S.histFilter = d.hist; render(); }
   else if (d.daudit) { S.dialogAudit = +d.daudit; render(); }
   else if (d.exclude) toggleExclude(+d.exclude);
   else if (d.excludeRecert) { S.window = 'latest'; S.tab = 'certificate'; toggleExclude(+d.excludeRecert); toast('Pattern set to always review; re-certified on the latest 9 weeks'); }
