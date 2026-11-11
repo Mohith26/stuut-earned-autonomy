@@ -242,6 +242,32 @@ export function simulateMonitor({ riskBefore, riskAfter, perDay, eps, alpha = 0.
   return { falseAlarmE: faE / sims, falseAlarmW: faW / sims, medianDelayE: med(delaysE), medianDelayW: med(delaysW) };
 }
 
+/**
+ * Why did hands-free risk move? Exact two-part (Kitagawa/Oaxaca) decomposition over patterns:
+ *   risk' - risk = sum_g (w'_g - w_g) * (r_g + r'_g)/2   [mix: more of a risky pattern]
+ *               + sum_g (r'_g - r_g) * (w_g + w'_g)/2    [rate: a pattern got worse]
+ * w = share of hands-free tasks in pattern g, r = its error rate. The symmetric weights make the
+ * two parts add up to the total change exactly. Patterns absent from one side use the other side's rate.
+ * before/after: arrays of {g, x}. Returns {total, mix, rate, byPattern: [{g, mix, rate, total, wB, wA, rB, rA}]}
+ */
+export function driftAttribution(before, after) {
+  const agg = arr => { const m = new Map(); for (const { g, x } of arr) { const e = m.get(g) || [0, 0]; e[0]++; e[1] += x ? 1 : 0; m.set(g, e); } return m; };
+  const B = agg(before), A = agg(after), nB = before.length, nA = after.length;
+  const gs = [...new Set([...B.keys(), ...A.keys()])];
+  let mix = 0, rate = 0; const byPattern = [];
+  for (const g of gs) {
+    const [bn, bk] = B.get(g) || [0, 0], [an, ak] = A.get(g) || [0, 0];
+    const wB = nB ? bn / nB : 0, wA = nA ? an / nA : 0;
+    let rB = bn ? bk / bn : null, rA = an ? ak / an : null;
+    if (rB == null) rB = rA; if (rA == null) rA = rB;
+    const pm = (wA - wB) * (rB + rA) / 2, pr = (rA - rB) * (wB + wA) / 2;
+    mix += pm; rate += pr; byPattern.push({ g, mix: pm, rate: pr, total: pm + pr, wB, wA, rB, rA, nB: bn, nA: an });
+  }
+  const riskB = nB ? before.reduce((s, e) => s + (e.x ? 1 : 0), 0) / nB : 0, riskA = nA ? after.reduce((s, e) => s + (e.x ? 1 : 0), 0) / nA : 0;
+  byPattern.sort((a, b) => b.total - a.total);
+  return { riskBefore: riskB, riskAfter: riskA, total: riskA - riskB, mix, rate, byPattern };
+}
+
 // ---------- utilities ----------
 /** mulberry32 seeded PRNG */
 export function rng(seed) {

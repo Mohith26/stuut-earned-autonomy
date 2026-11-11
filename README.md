@@ -16,7 +16,7 @@ Stuut teams start with review turned on and, in Stuut's own words, the goal is "
 
 Model ground truth at the certified thresholds (Monte Carlo from the generator): emails 1.89%, Cash App 1.30%, both under the 2% cap.
 
-**Drift.** On Mon Oct 26 the synthetic customer's ERP sync moves from hourly to nightly, so many more replies describe already-paid invoices as open (the "payment reported after the agent ran" pattern from Stuut's post). In the shadow run, hands-free error on emails rose to **6.50%** (23 of 354). With every hands-free reply audited, the monitor reverted the job **2.7 days** after the drift began (Oct 28 17:40), after **7** bad hands-free replies; a weekly batch check fires Nov 2, after 15. Re-certifying on the latest 9 weeks certifies nothing at 2% until that pattern is set to always go to review, which brings back **56.4%** hands-free (bound 1.76%).
+**Drift.** On Mon Oct 26 the synthetic customer's ERP sync moves from hourly to nightly, so many more replies describe already-paid invoices as open (the "payment reported after the agent ran" pattern from Stuut's post). In the shadow run, hands-free error on emails rose to **6.50%** (23 of 354). With every hands-free reply audited, the monitor reverted the job **2.7 days** after the drift began (Oct 28 17:40), after **7** bad hands-free replies; a weekly batch check fires Nov 2, after 15. At the revert, the monitor explains itself: hands-free error went from 1.12% to 5.65% in the trailing week, and an exact mix/rate decomposition traces **2.83 of those 4.53 points** to that one pattern (mostly because there was more of it). Re-certifying on the latest 9 weeks certifies nothing at 2% until that pattern (one click from the explanation) is set to always go to review, which brings back **56.4%** hands-free (bound 1.76%).
 
 **Audit rate trade-off** (simulated jump from 1.12% to 6.50%, 300 drifts and 300 quiet years each):
 
@@ -36,7 +36,8 @@ The monitor is slower than a weekly check at low audit rates; it pays for that b
 3. **Plan.** For the next thresholds, the reviews needed to certify them if their observed rate holds (`planUnlocks`), shown as "about 4,460 more reviews, ≈ 11.6 weeks".
 4. **Shadow run.** The certificate is replayed on four held-out weeks (Oct 12 – Nov 8) where reviews stayed on.
 5. **Monitor.** A betting e-process on audited hands-free outcomes, K_t = Π(1 + λ_i(X_i − 0.02)), with predictable Kelly bets from an exponentially weighted mean. Under "risk ≤ 2%" it is a nonnegative supermartingale, so by Ville's inequality the chance it ever crosses 20 is ≤ 5%. Crossing reverts the job (Waudby-Smith and Ramdas 2023). `eProcess`
-6. **Patterns.** Per named pattern (the groups from Stuut's review loop): change rate, median confidence, hands-free share and errors; any pattern can be set to "always review". Exclusions picked after viewing a window are marked provisional, because choosing them on the same data weakens the guarantee.
+6. **Why it fired.** At a revert, the change in hands-free error is split exactly across patterns into mix (more of a risky pattern) and rate (a pattern got worse) with a symmetric Kitagawa decomposition, so the fix (send that pattern to review, or fix upstream data) is one click away. `driftAttribution`
+7. **Patterns.** Per named pattern (the groups from Stuut's review loop): change rate, median confidence, hands-free share and errors; any pattern can be set to "always review". Exclusions picked after viewing a window are marked provisional, because choosing them on the same data weakens the guarantee.
 
 App features: four views (Certificate, Patterns with a case drill-down drawer, Shadow run & monitor, History in Audit Log style), turn on / turn off with a confirmation dialog and audit-rate choice, re-certify on the latest window, CSV/JSON export, deep links (`#/control-center/autonomy/monitor?job=email&audit=25`), state saved in `localStorage`, keyboard shortcuts (`1-3`, `c p m h`, `/`, `e`, `?`, `Esc`), loading and error states. Every number on the page is computed in the browser from `data/acme.json` by `src/`.
 
@@ -53,7 +54,7 @@ node --test test/autonomy.test.mjs
 python3 -m http.server        # then open http://localhost:8000
 ```
 
-15 tests: closed-form binomial/CP values, CP coverage (randomized), fixed-sequence stopping, certificate validity against ground truth (randomized, 120 teams), planner, e-process false-alarm rate under H0 and power under a 3x jump (randomized), bet predictability, weekly check, windows, headline numbers vs `results.json`, byte-identical regeneration, CSV escaping. A GitHub Actions workflow that runs them and fails if `results.json` drifts is in `ci/test.yml` (move it to `.github/workflows/` to activate; my push token lacked the workflow scope).
+16 tests: closed-form binomial/CP values, CP coverage (randomized), fixed-sequence stopping, certificate validity against ground truth (randomized, 120 teams), planner, e-process false-alarm rate under H0 and power under a 3x jump (randomized), bet predictability, weekly check, exact drift decomposition, windows, headline numbers vs `results.json`, byte-identical regeneration, CSV escaping. A GitHub Actions workflow that runs them and fails if `results.json` drifts is in `ci/test.yml` (move it to `.github/workflows/` to activate; my push token lacked the workflow scope).
 
 ## Limitations (honest)
 

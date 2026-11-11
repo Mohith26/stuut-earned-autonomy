@@ -31,7 +31,8 @@ for (const job of Object.values(data.jobs)) {
     },
     monitor: {
       audit100: { alarm: m.alarmT == null ? null : wall(m.alarmT), daysAfterDrift: m.alarmT != null && m.driftT != null ? +((m.alarmT - m.driftT) / 1440).toFixed(1) : null,
-        weeklyCheckAlarm: m.weekly ? wall(m.weekly.alarmT) : null, badBeforeAlarm: m.badBeforeAlarm, badBeforeWeekly: m.badBeforeWeekly },
+        weeklyCheckAlarm: m.weekly ? wall(m.weekly.alarmT) : null, badBeforeAlarm: m.badBeforeAlarm, badBeforeWeekly: m.badBeforeWeekly,
+        attribution: m.attribution ? { riskBeforePct: pct(m.attribution.riskBefore), riskAfterPct: pct(m.attribution.riskAfter), mixPts: +(100 * m.attribution.mix).toFixed(2), ratePts: +(100 * m.attribution.rate).toFixed(2), topPattern: job.patterns[m.attribution.byPattern[0].g], topPatternPts: +(100 * m.attribution.byPattern[0].total).toFixed(2) } : null },
       audit10: { audited: tenPct.audited, alarm: tenPct.alarmT == null ? null : wall(tenPct.alarmT), daysAfterDrift: tenPct.alarmT != null && tenPct.driftT != null ? +((tenPct.alarmT - tenPct.driftT) / 1440).toFixed(1) : null,
         weeklyCheckAlarm: tenPct.weekly ? wall(tenPct.weekly.alarmT) : null },
     },

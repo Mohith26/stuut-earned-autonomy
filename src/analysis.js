@@ -1,5 +1,5 @@
 // Job-level analysis shared by the app (browser) and scripts/report.mjs (Node).
-import { buildGrid, certify, evaluate, planUnlocks, eProcess, weeklyCheck, auditSample, simulateMonitor, LOSS_RULES } from './autonomy.js';
+import { buildGrid, certify, evaluate, planUnlocks, eProcess, weeklyCheck, auditSample, simulateMonitor, driftAttribution, LOSS_RULES } from './autonomy.js';
 
 export const WEEK = 10080;
 export const GRID_COVERAGES = Array.from({ length: 16 }, (_, i) => +(0.20 + 0.05 * i).toFixed(2)); // 20%..95%
@@ -74,6 +74,10 @@ export function analyzeJob(job, meta, opts = {}) {
         // bad hands-free outcomes between the drift and each alarm (what reached customers)
         badBeforeAlarm: Number.isFinite(driftT) ? auto.filter(i => job.cols.t[i] >= driftT && (ep.alarm < 0 || job.cols.t[i] <= job.cols.t[audited[ep.alarm]]) && L(i)).length : null,
         badBeforeWeekly: Number.isFinite(driftT) ? auto.filter(i => job.cols.t[i] >= driftT && (!weeklyAlarm || job.cols.t[i] < weeklyAlarm.alarmT) && L(i)).length : null,
+        // at the alarm: what changed? hands-free calibration tasks vs audited hands-free tasks in the 7 days up to the alarm
+        attribution: ep.alarm >= 0 ? driftAttribution(
+          W.calibration.filter(i => conf(i) >= cert.threshold).map(i => ({ g: job.cols.g[i], x: L(i) })),
+          audited.filter(i => job.cols.t[i] <= job.cols.t[audited[ep.alarm]] && job.cols.t[i] > job.cols.t[audited[ep.alarm]] - 10080).map(i => ({ g: job.cols.g[i], x: L(i) }))) : null,
       },
     };
   }

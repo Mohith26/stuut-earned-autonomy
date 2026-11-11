@@ -44,7 +44,15 @@
           "daysAfterDrift": 2.7,
           "weeklyCheckAlarm": "2026-11-02 00:00",
           "badBeforeAlarm": 7,
-          "badBeforeWeekly": 15
+          "badBeforeWeekly": 15,
+          "attribution": {
+            "riskBeforePct": 1.12,
+            "riskAfterPct": 5.65,
+            "mixPts": 2.59,
+            "ratePts": 1.94,
+            "topPattern": "Payment reported after the agent ran",
+            "topPatternPts": 2.83
+          }
         },
         "audit10": {
           "audited": 67,
@@ -154,7 +162,8 @@
           "daysAfterDrift": null,
           "weeklyCheckAlarm": null,
           "badBeforeAlarm": null,
-          "badBeforeWeekly": null
+          "badBeforeWeekly": null,
+          "attribution": null
         },
         "audit10": {
           "audited": 0,
@@ -219,7 +228,8 @@
           "daysAfterDrift": null,
           "weeklyCheckAlarm": null,
           "badBeforeAlarm": null,
-          "badBeforeWeekly": null
+          "badBeforeWeekly": null,
+          "attribution": null
         },
         "audit10": {
           "audited": 218,

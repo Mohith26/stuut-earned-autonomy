@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   lgamma, binomCdf, cpUpper, buildGrid, certify, evaluate, reviewsToCertify, eProcess,
-  weeklyCheck, rng, toCSV, auditSample, simulateMonitor,
+  weeklyCheck, rng, toCSV, auditSample, simulateMonitor, driftAttribution,
 } from '../src/autonomy.js';
 import { analyzeJob, windows, GRID_COVERAGES } from '../src/analysis.js';
 import { JOBS, sampleTask, randnOf, pickOf } from '../src/model.js';
@@ -174,4 +174,16 @@ test('CSV export escapes commas, quotes and newlines', () => {
   const csv = toCSV([{ a: 'Wright, Davis and Perez', b: 'said "hi"', c: 'x\ny' }],
     [{ key: 'a', label: 'Customer' }, { key: 'b', label: 'Note' }, { label: 'Multi', get: r => r.c }]);
   assert.equal(csv, 'Customer,Note,Multi\n"Wright, Davis and Perez","said ""hi""","x\ny"');
+});
+
+test('drift attribution splits the risk change exactly into mix and rate, and finds the drifted pattern', () => {
+  const R = rng(21);
+  const mk = (n, mixG1, r0, r1) => Array.from({ length: n }, () => { const g = R() < mixG1 ? 1 : 0; return { g, x: R() < (g ? r1 : r0) ? 1 : 0 }; });
+  const at = driftAttribution(mk(60000, 0.02, 0.01, 0.4), mk(60000, 0.15, 0.01, 0.4));
+  assert.ok(Math.abs(at.mix + at.rate - at.total) < 1e-12);
+  assert.ok(Math.abs(at.byPattern.reduce((s, p) => s + p.total, 0) - at.total) < 1e-12);
+  assert.equal(at.byPattern[0].g, 1);
+  assert.ok(at.mix > 4 * Math.abs(at.rate), 'pure mix shift is attributed to mix');
+  const a = analyzeJob(data.jobs.email, data.meta, {});
+  assert.equal(a.shadow.monitor.attribution.byPattern[0].g, data.jobs.email.drift.pattern);
 });

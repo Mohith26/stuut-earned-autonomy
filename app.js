@@ -310,12 +310,24 @@ function viewMonitor() {
       ${chartSlot('ev', W => timeChart({ W, series: [{ t: t0, v: 1 }, ...ev], yLog: true, yMin: 0.1, yMax: 1000, threshold: m.threshold, thresholdLabel: `Revert at ${m.threshold}`, markers, t0, t1, fmtY: v => v >= 1 ? String(v) : v.toFixed(1), step: true, aria: 'Monitor e-value over time' }))}</div>
       <div><h3>Hands-free error rate, trailing 7 days</h3><div class="card-sub">All shadow-run tasks at or above the threshold (reviews stayed on)</div>
       ${chartSlot('roll', W => timeChart({ W, series: roll, yMax: Math.max(0.1, Math.ceil(Math.max(...roll.map(r => r.v), 0) * 50) / 50), threshold: S.eps, thresholdLabel: `Cap ${pct(S.eps, 0)}`, markers: markers.slice(0, 2), t0, t1, fmtY: v => `${(v * 100).toFixed(0)}%`, color: 'var(--stuut-blue-700)', aria: 'Trailing seven-day hands-free error rate' }))}</div></div></div>
+    ${m.attribution ? attributionCard(m.attribution, job) : ''}
     <div class="grid2b"><div class="card"><h3>What audit rate do you need?</h3><div class="card-sub">${sh.post ? `Simulated: hands-free risk jumps from ${pct(a.cert.risk, 2)} to ${pct(sh.post.risk, 2)}, as in this drift. Median over 300 drifts; false alarms over 300 quiet years.` : 'No drift in this job.'}</div>
       ${tbl.length ? `<table class="tbl"><thead><tr><th>Audit rate</th><th class="r">Audits / day</th><th class="r">Days to revert</th><th class="r">Weekly check</th><th class="r">False alarms / yr</th><th class="r">Weekly check</th></tr></thead><tbody>${tbl.map(r => `<tr class="${S.audit === r.rate ? 'sel' : ''}"><td>${pct(r.rate, 0)}</td><td class="r num">${r.perDay}</td><td class="r num"><b>${r.medianDaysE.toFixed(1)}</b></td><td class="r num muted">${r.medianDaysW}</td><td class="r num"><b>${pct(r.falseAlarmE, 1)}</b></td><td class="r num muted">${pct(r.falseAlarmW, 0)}</td></tr>`).join('')}</tbody></table>
       <div class="method">The weekly check is a binomial test on each week's audits at the same level. It is often as fast, but it tests every week, so its false alarms add up; every false alarm sends the whole job back to review.</div>` : '<div class="empty" style="padding:20px 0">Nothing to simulate for this job.</div>'}
       ${job.drift ? `<div style="margin-top:12px"><button class="btn" data-act="recert"><i data-lucide="refresh-cw"></i>Re-certify on latest 9 weeks</button></div>` : ''}</div>
     <div class="card"><h3>Shadow run by week</h3><div class="card-sub">Every would-be hands-free task still has a reviewer outcome</div>
       <table class="tbl"><thead><tr><th style="width:150px">Week</th><th class="r">Tasks</th><th class="r">Would be hands-free</th><th class="r">Changed by reviewer</th><th class="r">Hands-free error rate</th><th>Status</th></tr></thead><tbody>${weekly}</tbody></table></div></div>`;
+}
+
+function attributionCard(at, job) {
+  const top = at.byPattern.filter(p => p.total > 0).slice(0, 4);
+  const max = Math.max(...top.map(p => p.total), 1e-9);
+  const ex = excludedSet(job.key);
+  return `<div class="card" style="margin-top:12px"><div class="card-head"><div><h3>Why it fired</h3><div class="card-sub">Hands-free error went from ${pct(at.riskBefore, 2)} (certificate window) to ${pct(at.riskAfter, 2)} (audits in the 7 days before the revert). Split exactly into more of a risky pattern (mix, ${(at.mix * 100).toFixed(2)} pts) and patterns getting worse (rate, ${(at.rate * 100).toFixed(2)} pts).</div></div></div>
+    <table class="tbl"><thead><tr><th class="pcol">Pattern</th><th class="r">Share of hands-free</th><th class="r">Error rate</th><th>Contribution</th><th class="r"></th></tr></thead><tbody>
+    ${top.map(p => `<tr><td><span class="linkish">${esc(job.patterns[p.g])}</span></td><td class="r num">${pct(p.wB, 1)} → <b>${pct(p.wA, 1)}</b></td><td class="r num">${pct(p.rB, 1)} → <b>${pct(p.rA, 1)}</b></td>
+      <td class="num" style="white-space:nowrap">+${(p.total * 100).toFixed(2)} pts <span class="bar" style="width:90px"><i style="width:${(100 * p.total / max).toFixed(0)}%;background:${p.mix >= p.rate ? 'var(--stuut-red-300)' : 'var(--stuut-blue-500)'}"></i></span> <span class="muted">${p.mix >= p.rate ? 'mix' : 'rate'}</span></td>
+      <td class="r">${ex.has(p.g) ? '<span class="pill muted">Always review</span>' : `<button class="btn" data-exclude-recert="${p.g}">Always review</button>`}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 // ---------- history tab ----------
@@ -415,7 +427,7 @@ function toggleExclude(g) {
   S.saved.excluded[S.job] = [...cur]; persist(); render();
 }
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-tab],[data-job],[data-act],[data-export],[data-sort],[data-pattern],[data-df],[data-page],[data-audit],[data-daudit],[data-exclude],[data-pt],[data-raw]');
+  const t = e.target.closest('[data-tab],[data-job],[data-act],[data-export],[data-sort],[data-pattern],[data-df],[data-page],[data-audit],[data-daudit],[data-exclude],[data-exclude-recert],[data-pt],[data-raw]');
   if (S.menu && !(t && (t.dataset.act === 'menu' || t.dataset.export))) { S.menu = false; render(); }
   if (!t) return;
   if (t.closest('[data-exclude-toggle]')) return;
@@ -430,6 +442,7 @@ document.addEventListener('click', e => {
   else if (d.audit) { S.audit = +d.audit; render(); }
   else if (d.daudit) { S.dialogAudit = +d.daudit; render(); }
   else if (d.exclude) toggleExclude(+d.exclude);
+  else if (d.excludeRecert) { S.window = 'latest'; S.tab = 'certificate'; toggleExclude(+d.excludeRecert); toast('Pattern set to always review; re-certified on the latest 9 weeks'); }
   else if (d.act) {
     e.preventDefault();
     const job = S.data.jobs[S.job];
